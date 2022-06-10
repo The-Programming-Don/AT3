@@ -1,5 +1,3 @@
-from curses import halfdelay
-from ssl import Options
 from player import Player
 from item import Item
 from location import Location
@@ -8,11 +6,19 @@ from location import Location
 entrance = Location("entrance", "S, E", "This seems to be the entrance room, its dark, mystical, weird magical totems are around \n and there is an ominous feeling about this place...")
 exit = Location("Exit room", "N", "Its cold in here...there seems to be a trap door... the room is otherwise empty")
 pre_exit = Location("Lower dungeon", "N" + "S", "Woah there is a red gem... and what seems to be fairies... maybe i should go talk to them")
-ghost_room = Location("Hallway", "W, E, N", "There is a scary ghost over there blocking the door, he looks rather timid though, I can try talking to him though... \n there is also a door just past him that isn't blocked")
+ghost_room = Location("Hallway", "W, E, N", "There is a scary ghost over there blocking the door, he looks rather timid, I can try talking to him... there is also a door just past him that isn't blocked")
 gaunetlet_room = Location("Treasure room", "S", "There seems to be a gauntlet floating on a stone, it seems so mystical and there is writing on the stone \n it reads...'Gauntlet of Destruction'")
 rock_room = Location("Dungeon's lair", "E, S, W", "Nice a red rupee!, there is a massive stone to my south that i cant get past, something is behind it \n but to me west there is a jail room... its getting scary in here")
 jail = Location("Jail", "W", "It's dark, wet and cold in here, i can see a jail cell in the back corner, something is in there too...")
 key_room = Location("The Wizards Vault", "N", "Woah there is a magical key, it looks important... something tells me i should'nt have made it this far.")
+
+
+#instanciating items
+rupee1 = Item("rupee", "A shiny red gem")
+rupee2 = Item("rupee", "A shiny red gem")
+rupee3 = Item("rupee", "A shiny red gem")
+key = Item("key", "its a key")
+gauntlet = ("Gauntlet of Destruction", "its a gauntlet")
 
 
 
@@ -57,14 +63,6 @@ def directions_avaliable():
     return options
 
 
-#instanciating items
-rupee1 = Item("rupee")
-rupee2 = Item("rupee")
-rupee3 = Item("rupee")
-key = Item("key")
-
-
-
 
 # The frist user input
 introduction = input("Hello, Enter the name of your character: ")
@@ -72,5 +70,24 @@ introduction = input("Hello, Enter the name of your character: ")
 player = Player(introduction)
 player.current_room = entrance
 
-#nextRoom  = input(f"Where you like to go now?: {player.current_room.rooms_avaliable}")
+print(player.current_room.description)
 
+while True:
+    try:
+         
+        nextRoom  = str(input("Where you like to go now?: " + (directions_avaliable())))
+        if nextRoom == 'S':
+            player.current_room = pre_exit
+            break
+        if nextRoom == 'E':
+            player.current_room = ghost_room
+            break
+        else:
+            print("That option isnt avaliable, try again.")
+            continue
+    except ValueError:
+        print("That option isnt avaliable, try again.")
+        continue
+   
+
+print("You are now in the" + player.current_room.name + "\n" + player.current_room.description)
