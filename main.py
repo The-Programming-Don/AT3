@@ -1,27 +1,40 @@
+from Npc import NPC
 from player import Player
 from item import Item
 from location import Location
 
 #instanciating locations
-entrance = Location("entrance", "S, E", "This seems to be the entrance room, its dark, mystical, weird magical totems are around \n and there is an ominous feeling about this place...")
-exit = Location("Exit room", "N", "Its cold in here...there seems to be a trap door... the room is otherwise empty")
-pre_exit = Location("Lower dungeon", "N" + "S", "Woah there is a red gem... and what seems to be fairies... maybe i should go talk to them")
-ghost_room = Location("Hallway", "W, E, N", "There is a scary ghost over there blocking the door, he looks rather timid, I can try talking to him... there is also a door just past him that isn't blocked")
-gaunetlet_room = Location("Treasure room", "S", "There seems to be a gauntlet floating on a stone, it seems so mystical and there is writing on the stone \n it reads...'Gauntlet of Destruction'")
-rock_room = Location("Dungeon's lair", "E, S, W", "Nice a red rupee!, there is a massive stone to my south that i cant get past, something is behind it \n but to me west there is a jail room... its getting scary in here")
-jail = Location("Jail", "W", "It's dark, wet and cold in here, i can see a jail cell in the back corner, something is in there too...")
-key_room = Location("The Wizards Vault", "N", "Woah there is a magical key, it looks important... something tells me i should'nt have made it this far.")
+entrance = Location("entrance", "S, E", "This seems to be the entrance room, its dark, mystical, weird magical totems are around \n and there is an ominous feeling about this place...", False, False)
+exit = Location("Exit room", "N", "Its cold in here...there seems to be a trap door... the room is otherwise empty", False, False)
+pre_exit = Location("Lower dungeon", "N" + "S", "Woah that door doesnt look like its going to open without a key \n there is a red gem... and what seems to be fairies... maybe i should go talk to them", True, True)
+ghost_room = Location("Hallway", "W, E, N", "There is a scary ghost over there blocking the door, he looks rather timid, I can try talking to him... there is also a door just past him that isn't blocked", False, True)
+gaunetlet_room = Location("Treasure room", "S", "There seems to be a gauntlet floating on a stone, it seems so mystical and there is writing on the stone \n it reads...'Gauntlet of Destruction'", True, False)
+rock_room = Location("Dungeon's lair", "E, S, W", "Nice a red rupee!, there is a massive stone to my south that i cant get past, something is behind it \n but to me west there is a jail room... its getting scary in here", True, False)
+jail = Location("Jail", "W", "It's dark, wet and cold in here, i can see a jail cell in the back corner, something is in there too...", False, True)
+key_room = Location("The Wizards Vault", "N", "Woah there is a magical key, it looks important... something tells me i should'nt have made it this far.", True, False)
 
+#instanciating the NPC's
+ghost = NPC("The Firey Ghost", "'Grrr.. Get away from me! \n I will only let you past if you find something to cool me down'")
+fairy = NPC("Fairies", "'hehehe... Not many people make it out of here, lets see if you're smart enough to open this door'")
+elf = NPC("Elf", "'Pssssst... hey! ... Listen, if you give me 3 rupees i'll give ya this ice staff'")
+
+pre_exit.character = [fairy]
+ghost_room.character = [ghost]
+jail.character = [elf]
 
 #instanciating items
 rupee1 = Item("rupee", "A shiny red gem")
 rupee2 = Item("rupee", "A shiny red gem")
 rupee3 = Item("rupee", "A shiny red gem")
 key = Item("key", "its a key")
-gauntlet = ("Gauntlet of Destruction", "its a gauntlet")
+gauntlet = Item("Gauntlet of Destruction", "its a gauntlet")
+staff = Item("staff", "its a magical staff")
 
-
-
+pre_exit.items = [rupee1]
+gaunetlet_room.items = [gauntlet]
+rock_room.items = [rupee2]
+key_room.items = [key]
+jail.items = [rupee3, staff]
 
 #Creating the 2D array in which all locations are mapped out
 locationGrid = [
@@ -89,5 +102,29 @@ while True:
         print("That option isnt avaliable, try again.")
         continue
    
+while True:
+    try:
+        print("You are now in the " + player.current_room.name + "\n" + player.current_room.description)
+        if player.current_room.hasItems == True:
+                print ("--> " + player.current_room.items[0].type + "              type 'collect'")
+        if player.current_room.hasNpc == True:
+                print("talk to " + player.current_room.character[0].name + "              type 'talk'")
+        nextRoom  = str(input("What would you like to do now?: " + (directions_avaliable())))
+        if nextRoom == 'S':
+            player.current_room = pre_exit
+            break
+        if nextRoom == 'E':
+            player.current_room = ghost_room
+            break
+        if nextRoom == 'talk':
+            print(player.current_room.character[0].talk)
+        if nextRoom == 'collect':
+            print("You aquired a " + player.current_room.items[0].type)
+            player.inventory = (player.current_room.items[0])
+        else:
+            print("That option isnt avaliable, try again.")
+            continue
+    except ValueError:
+        print("That option isnt avaliable, try again.")
+        continue
 
-print("You are now in the" + player.current_room.name + "\n" + player.current_room.description)

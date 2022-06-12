@@ -8,10 +8,14 @@ from Npc import NPC
 
 
 class Location(Player, Item, NPC):
-    def __init__(self, name, rooms_avaliable, description):
+    def __init__(self, name, rooms_avaliable, description, hasitems, hasNpc):
         self.name = name
         self.rooms_avaliable = rooms_avaliable
         self.description = description
+        self.hasItems = hasitems
+        self.hasNpc = hasNpc
+        self.items = [ ]
+        self.character = []
         
 
         
