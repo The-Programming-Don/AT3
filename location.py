@@ -1,4 +1,7 @@
+from contextlib import nullcontext
 import Npc
+from item import Staff, Gauntlet, Rupee
+
 class Location():
     def __init__(self, x, y,):
         self.x = x
@@ -6,7 +9,7 @@ class Location():
         
     def description(self):
         raise NotImplementedError("subclasss")
-
+ # a bunch of location classes and thier corresponding required code
 class Entrance(Location):
     def description(self):
         return """
@@ -26,38 +29,54 @@ class Pre_Exit(Location):
         "Woah that door doesnt look like its going to open without a key \n there is a red gem... and what seems to be fairies... maybe i should go talk to them"
         """
 
-class Ghost_Room(Location):
-    def description(self):
-        return """
-        "There seems to be a Ghost of fire in this hallway blocking off an exit..."
-        """
 
 class Rock_Room(Location):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.hasGauntlet = False
     def description(self):
         return """
-        Nice a red rupee!, there is a massive stone to my south that i cant get past, something is behind it \n but to me west there is a jail room... its getting scary in here
+        Nice a red rupee!, there is a massive stone to my south that i cant get past, something is behind it \n but to my west there is a jail room... its getting scary in here
         """
 
+
 class Gauntlet_room(Location):
+    def __init__(self, x, y):
+        self.gauntlet = Gauntlet()
+        super().__init__(x, y)
     def description(self):
         return """
         There seems to be a gauntlet floating on a stone, it seems so mystical and there is writing on the stone \n it reads...'Gauntlet of Destruction'
         """
-
+    def destroy(self):
+        self.gauntlet = None
 class KeyRoom(Location):
     def description(self):
         return """
         Woah there is a magical key, it looks important... something tells me i should'nt have made it this far.
         """
 
-class GhostTile(Location):
+
+
+class GhostRoom(Location):
     def __init__(self, x, y):
-        self.ghost = Npc.Ghost
+        self.ghost = Npc.Ghost()
         super().__init__(x, y)
+
+    def description(self):
+        return """
+        There seems to be a Ghost of fire in this hallway blocking off the North exit...
+        He wont move out the way until he 'cools' down.
+        """
+    def destory(self):
+        self.ghost = nullcontext
+    
+
 
 class elfTile(Location):
     def __init__(self, x, y):
         self.elf = Npc.Elf()
+        self.allow_player_in_gauntlet = False
         super().__init__(x, y)
 
     def description(self):
@@ -65,6 +84,15 @@ class elfTile(Location):
         You're in the Jail. the aura of this place doesnt make you feel good.
         There is an Elf in the Jail Cell
         """
+    
+# a little bit of magic happens here, this takes a buyer and seller argument, so for future itterations we could give the player the ability to sell and buy
+# but right now we set the player as buyer and his money gets taken for an item in return
+
+    def allow_access(self):
+        if Npc.Ghost().inventory.__contains__(Staff()):
+            return True
+        else: 
+            return False
 
     def trade(self, buyer, seller):
         for i, item in enumerate(seller.inventory, 1):
@@ -86,10 +114,13 @@ class elfTile(Location):
             print("That amount of Rupee isn't gonna cut it! I need 3!")
             return
         seller.inventory.remove(item)
-        buyer.inventory.append(item)
+        buyer.inventory.append("Staff of Ice")
         seller.rupee = seller.rupee + item.value
-        buyer.Rupee = buyer.rupee - item.value
+        buyer.rupee = buyer.rupee - item.value
         print("Hehehe, thanks kid, enjoy the staff")
+        self.allow_access()
+        
+
 
     def check_if_trading(self, player):
         while  True:
@@ -123,14 +154,14 @@ class Fairy(Location):
 
 
 
-    
+    ## this is our location map, this is how the otherfunctions know where we are and whats available to us
 locationGrid = [
     [None,Gauntlet_room(1,0),None,None],
-    [Entrance(0,1),Ghost_Room(1,1),Rock_Room(2,1),elfTile(3,1)],
+    [Entrance(0,1),GhostRoom(1,1),Rock_Room(2,1),elfTile(3,1)],
     [Pre_Exit(0,2),None,KeyRoom(2,2),None],
     [Exit(0,3),None,None,None]   
 ]
-
+# this is a similar grid, however this attaches a world map as a dictionary
 world_dsl = """
 |  |HR|  |  |
 |SR|GR|RR|NR|
@@ -139,7 +170,7 @@ world_dsl = """
 """
 room_type = { "VR": Exit,
 "SR": Entrance,
-"GR": Ghost_Room,
+"GR": GhostRoom,
 "HR": Gauntlet_room,
 "RR": Rock_Room,
 "NR": elfTile,
@@ -178,7 +209,7 @@ def is_dsl_valid(dsl):
         if count != pipe_counts[0]:
             return False
     return True
-
+# this gets called all the time to tell the program where the players x and y cords are based on the room.
 def where_abouts(x, y):
     if x < 0 or y < 0:
         return None

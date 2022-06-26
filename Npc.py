@@ -13,7 +13,7 @@ class Fairy(NPC):
     def __init__(self):
         self.name = "Fairies"
         
-    def __str__(self):
+    def talk(self):
         return """
         You wont get through this door young Adventurer
         """
